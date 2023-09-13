@@ -1,0 +1,18 @@
+Considere o seguinte esquema e as seguintes queries, faça o particionamento horizontal.
+
+aluno(mat, nome, CR, UF)
+  PRIMARY KEY(mat)
+
+livro(isbn, titulo, genero)
+  PRIMARY KEY(isbn)
+
+emprestimo(mat, isbn, data)
+  PRIMARY KEY(mat, isbn, data)
+  mat REFERENCES aluno(mat)
+  isbn REFERENCES livro(isbn)
+
+Q1. delta cr >9 (aluno)
+Q2. delta cr < 4 ^ UF ='RJ'(aluno)
+Q3. delta genero = 'Terror'(livro)
+Q4. delta uf = 'SP' (aluno >< emprestimo)
+
