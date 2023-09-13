@@ -4,18 +4,20 @@ CREATE SCHEMA exercicio02;
 /* Uso do esquema*/
 SET SCHEMA 'exercicio02';
 
+/* Criando tabela projeto*/
 CREATE TABLE projeto(
-  IDPROJETO INT not NULL,
-  ORCAMENTO DOUBLE PRECISION NOT NULL,
-  CIDADE VARCHAR(100) NOT NULL,
-  PRIMARY KEY(IDPROJETO)
+  idprojeto INT not NULL,
+  orcamento DOUBLE PRECISION NOT NULL,
+  cidade VARCHAR(100) NOT NULL,
+  PRIMARY KEY(idprojeto)
 );
 
-CREATE TABLE depesa(
-  TIPODESPESA CHAR(1) not NULL,
-  NRDOCUMENTO INT NOT NULL,
-  IDPROJETO INT NOT NULL,
-  VALOR DOUBLE PRECISION NOT NULL,
-  PRIMARY KEY(TIPODESPESA, NRDOCUMENTO),
-  FOREIGN KEY(IDPROJETO) REFERENCES projeto(IDPROJETO)
+/* Criando tabela despesa */
+CREATE TABLE despesa(
+  tipodespesa CHAR(1) not NULL,
+  nrdocumento INT NOT NULL,
+  idprojeto INT NOT NULL,
+  valor DOUBLE PRECISION NOT NULL,
+  PRIMARY KEY(tipodespesa, nrdocumento),
+  FOREIGN KEY(idprojeto) REFERENCES projeto(idprojeto)
 );
