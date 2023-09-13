@@ -1,10 +1,13 @@
 Considere o esquema a seguir:
 
-PROJETO(IDPROJETO: INT, ORCAMENTO: DOUBLE, CIDADE: VARCHAR(100));
+PROJETO(IDPROJETO: INT, ORCAMENTO: DOUBLE, CIDADE: VARCHAR(100))
+  PRIMARY KEY(IDPRROJETO)
+
 DESPESA(TIPODESPESA: CHAR(1), NRDOCUMENTO: INT, IDPROJETO: INT, VALOR: DOUBLE)
-  IDPROJETO REFERENCIA PROJETO(IDPROJETO);
+  PRIMARY KEY(TIPODESPESA, NRDOCUMENTO)
+  IDPROJETO REFERENCIA PROJETO(IDPROJETO)
 
 PROPONHA ÍNDICES PARA AS SEGUINTES CONSULTAS:
 1) A consulta deve retornar despesas de projetos com orçamento maior que 100.000,00.
 2) A consulta deve retornar o total de despesas de projetos de Niterói.
-3) a consulta deve retornar o total de despesas de projetos do Rio de Janeiro agrupado por tipo de defesa.
+3) A consulta deve retornar o total de despesas de projetos do Rio de Janeiro agrupado por tipo de despesa.
