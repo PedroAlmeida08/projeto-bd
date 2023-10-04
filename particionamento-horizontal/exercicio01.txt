@@ -11,8 +11,112 @@ emprestimo(mat, isbn, data)
   mat REFERENCES aluno(mat)
   isbn REFERENCES livro(isbn)
 
-Q1. delta cr >9 (aluno)
-Q2. delta cr < 4 ^ UF ='RJ'(aluno)
-Q3. delta genero = 'Terror'(livro)
-Q4. delta uf = 'SP' (aluno >< emprestimo)
+δ = seleção
+π = projeção
+⋉ = right join
+⋊ = left join
+⋈ = full join
 
+Q1. δ cr >9 (aluno)
+Q2. δ cr < 4 ^ UF ='RJ'(aluno)
+Q3. δ genero = 'Terror'(livro)
+Q4. δ uf = 'SP' (aluno ⋈ emprestimo)
+
+Tabela aluno = Fragmentação Horizontal Primária
+Tabela livro = Fragmentação Horizontal Primária
+Tabela emprestimo = Fragmentação Horizontal Derivada (pois possui atributos que referenciam outras tabelas)
+
+Predicados simples:
+P1. CR > 9
+P2. CR < 4
+P3. UF = "RJ"
+P4. UF = "SP"
+P5. genero = "terror"
+
+==> FHP de livro
+nº mintermos = 2 ^ nº de predicados simples que o envolvem
+nº mintermos = 2 ^ 1 = 2
+
+livro_1. genero = "terror"
+livro_2. genero != "terror"
+
+==> FHP de aluno
+nº mintermos = 2 ^ nº de predicados simples que o envolvem
+nº mintermos = 2 ^ 4 = 16
+
+aluno_1.  P1 ^ P2 ^ P3 ^ P4
+aluno_2.  P1 ^ P2 ^ P3 ^ ¬P4
+aluno_3.  P1 ^ P2 ^ ¬P3 ^ P4
+aluno_4.  P1 ^ P2 ^ ¬P3 ^ ¬P4
+aluno_5.  P1 ^ ¬P2 ^ P3 ^ P4
+aluno_6.  P1 ^ ¬P2 ^ P3 ^ ¬P4
+aluno_7.  P1 ^ ¬P2 ^ ¬P3 ^ P4
+aluno_8.  P1 ^ ¬P2 ^ ¬P3 ^ ¬P4
+aluno_9.  ¬P1 ^ P2 ^ P3 ^ P4
+aluno_10. ¬P1 ^ P2 ^ P3 ^ ¬P4
+aluno_11. ¬P1 ^ P2 ^ ¬P3 ^ P4
+aluno_12. ¬P1 ^ P2 ^ ¬P3 ^ ¬P4
+aluno_13. ¬P1 ^ ¬P2 ^ P3 ^ P4
+aluno_14. ¬P1 ^ ¬P2 ^ P3 ^ ¬P4
+aluno_15. ¬P1 ^ ¬P2 ^ ¬P3 ^ P4
+aluno_16. ¬P1 ^ ¬P2 ^ ¬P3 ^ ¬P4
+
+Como não podemos ter P1 ^ P2 nem P3 ^ P4, podemos simplificar:
+
+aluno_6.  P1 ^ ¬P2 ^ P3 ^ ¬P4
+aluno_7.  P1 ^ ¬P2 ^ ¬P3 ^ P4
+aluno_8.  P1 ^ ¬P2 ^ ¬P3 ^ ¬P4
+aluno_10. ¬P1 ^ P2 ^ P3 ^ ¬P4
+aluno_11. ¬P1 ^ P2 ^ ¬P3 ^ P4
+aluno_12. ¬P1 ^ P2 ^ ¬P3 ^ ¬P4
+aluno_14. ¬P1 ^ ¬P2 ^ P3 ^ ¬P4
+aluno_15. ¬P1 ^ ¬P2 ^ ¬P3 ^ P4
+aluno_16. ¬P1 ^ ¬P2 ^ ¬P3 ^ ¬P4
+
+Além disso, podemos simplificar da seguinte forma:
+
+aluno6. P1 ^ ¬P2 ^ P3 ^ ¬P4
+aluno6. CR > 9 ^ ¬CR < 4 ^ UF = "RJ" ^ ¬UF = "SP"
+
+CR > 9 ^ ¬CR < 4 => CR > 9 ^ CR >= 4, que pode ser simplificado como CR > 9
+UF = "RJ" ^ ¬UF = "SP" => UF = "RJ" ^ UF != "SP", que pode ser simplificado como UF = "RJ"
+
+Com essas simplificações, teremos as seguintes partições:
+
+aluno_6.  CR > 9 ^ UF = "RJ"
+aluno_7.  CR > 9 ^ UF = "SP"
+aluno_8.  CR > 9 ^ UF != "RJ" ^ UF != "SP"
+aluno_10. CR < 4 ^ UF = "RJ"
+aluno_11. CR < 4 ^ UF = "SP"
+aluno_12. CR < 4 ^ UF != "RJ" ^ UF != "SP"
+aluno_14. CR ≤ 9 ^ CR ≥ 4 ^ UF = "RJ"
+aluno_15. CR ≤ 9 ^ CR ≥ 4 ^ UF = "SP"
+aluno_16. CR ≤ 9 ^ CR ≥ 4 ^ UF != "RJ" ^ UF != "SP"
+
+Simplificando novamente:
+
+aluno_1.  CR > 9 ^ UF = "RJ"
+aluno_2.  CR > 9 ^ UF = "SP"
+aluno_3.  CR > 9 ^ UF != "RJ" ^ UF != "SP"
+aluno_4. CR < 4 ^ UF = "RJ"
+aluno_5. CR < 4 ^ UF = "SP"
+aluno_6. CR < 4 ^ UF != "RJ" ^ UF != "SP"
+aluno_7. CR ≤ 9 ^ CR ≥ 4 ^ UF = "RJ"
+aluno_8. CR ≤ 9 ^ CR ≥ 4 ^ UF = "SP"
+aluno_9. CR ≤ 9 ^ CR ≥ 4 ^ UF != "RJ" ^ UF != "SP"
+
+==> FHD de emprestimo
+
+Para definir qual "herança" de fragmentos a tabela emprestimo irá "herdar", devemos observar o seguinte:
+1 - Número de vezes que faz junção com uma outra tabela. A "herança" de fragmentos irá "herdar" os fragmentos que possuem maior número de junções com a tabela em questão;
+2 - A "herança" de fragmentos irá "herdar" os fragmentos da tabela que possui maior número de fragmentos.
+
+Nesse caso, a tabela emprestimo faz apenas uma junção. 
+Essa junção é feita com a tabela aluno, por isso, emprestimo irá "herdar" os fragmentos de aluno. 
+
+Portanto, emprestimo:
+
+emprestimo_1. emprestimo ⋉ aluno_1
+emprestimo_2. emprestimo ⋉ aluno_2
+              ...
+emprestimo_9. emprestimo ⋉ aluno_9
