@@ -1,0 +1,108 @@
+CLIENTE
+LIVRO
+CLIENTE -> NOTA_FISCAL
+NOTA_FISCAL \
+             ==> ITEM_NF 
+LIVRO       /
+
+predicados:
+1 - categoria = 'Terror'  (LIVRO)
+2 - categoria = 'Romance' (LIVRO)
+3 - anopublicacao > 2021  (LIVRO)
+4 - anopublicacao < 1999  (LIVRO)
+5 - uf = 'RJ'             (CLIENTE)
+6 - uf = 'AM'             (CLIENTE)
+7 - uf = 'CE'             (CLIENTE)
+8 - cnome != 'Daniel'     (CLIENTE)
+
+CLIENTE -> FHP
+nº de mintermos = 2^4 = 16
+
+P1 => uf = 'RJ'
+P2 => uf = 'AM'
+P3 => uf = 'CE'
+P4 => cnome != 'Daniel'
+
+p1 ^ p2 ^  p3 ^  p4       p1 ^ ¬p2 ^   p3 ^  p4     ¬p1 ^ p2 ^  p3 ^  p4      ¬p1 ^ ¬p2 ^   p3 ^   p4
+p1 ^ p2 ^  p3 ^ ¬p4       p1 ^ ¬p2 ^   p3 ^ ¬p4     ¬p1 ^ p2 ^  p3 ^  ¬p4     ¬p1 ^ ¬p2 ^   p3 ^  ¬p4        
+p1 ^ p2 ^ ¬p3 ^  p4       p1 ^ ¬p2 ^  ¬p3 ^  p4     ¬p1 ^ p2 ^ ¬p3 ^   p4     ¬p1 ^ ¬p2 ^  ¬p3 ^   p4
+p1 ^ p2 ^ ¬p3 ^ ¬p4       p1 ^ ¬p2 ^  ¬p3 ^ ¬p4     ¬p1 ^ p2 ^ ¬p3 ^  ¬p4     ¬p1 ^ ¬p2 ^  ¬p3 ^  ¬p4
+
+Como não podemos ter P1 ^ P2 ou P1 ^ P3 ou P2 ^ P3 ou P1 ^ P2 ^ P3, podemos simplificar:
+
+p1 ^ ¬p2 ^  ¬p3 ^  p4       ¬p1 ^ ¬p2 ^   p3 ^   p4
+p1 ^ ¬p2 ^  ¬p3 ^ ¬p4       ¬p1 ^ ¬p2 ^   p3 ^  ¬p4 
+¬p1 ^ p2 ^ ¬p3 ^   p4       ¬p1 ^ ¬p2 ^  ¬p3 ^   p4
+¬p1 ^ p2 ^ ¬p3 ^  ¬p4       ¬p1 ^ ¬p2 ^  ¬p3 ^  ¬p4
+
+Além disso, podemos simplificar da seguinte forma:
+
+UF = "RJ" ^ ¬UF = "AM" ^ ¬UF = "CE"=> UF = "RJ" ^ UF != "AM" ^ UF != "CE", que pode ser simplificado como UF = "RJ"
+
+cliente1. UF = 'RJ' ^ cnome != 'Daniel'      cliente5. UF  = 'CE' ^ cnome != 'Daniel'
+cliente2. UF = 'RJ' ^ cnome  = 'Daniel'      cliente6. UF  = 'CE' ^ cnome  = 'Daniel'
+cliente3. UF = 'AM' ^ cnome != 'Daniel'      cliente7. UF != 'RJ' ^ UF != 'AM' ^ UF != 'CE' ^ cnome != 'Daniel'
+cliente4. UF = 'AM' ^ cnome  = 'Daniel'      cliente8. UF != 'RJ' ^ UF != 'AM' ^ UF != 'CE' ^ cnome  = 'Daniel'
+
+LIVRO -> FHP
+nº de mintermos = 2^4 = 16
+
+P1 => categoria = 'Terror'
+P2 => categoria = 'Romance'
+P3 => anopublicacao > 2021
+P4 = > anopublicacao < 1999
+
+p1 ^ p2 ^  p3 ^  p4       p1 ^ ¬p2 ^   p3 ^  p4     ¬p1 ^ p2 ^  p3 ^  p4      ¬p1 ^ ¬p2 ^   p3 ^   p4
+p1 ^ p2 ^  p3 ^ ¬p4       p1 ^ ¬p2 ^   p3 ^ ¬p4     ¬p1 ^ p2 ^  p3 ^  ¬p4     ¬p1 ^ ¬p2 ^   p3 ^  ¬p4        
+p1 ^ p2 ^ ¬p3 ^  p4       p1 ^ ¬p2 ^  ¬p3 ^  p4     ¬p1 ^ p2 ^ ¬p3 ^   p4     ¬p1 ^ ¬p2 ^  ¬p3 ^   p4
+p1 ^ p2 ^ ¬p3 ^ ¬p4       p1 ^ ¬p2 ^  ¬p3 ^ ¬p4     ¬p1 ^ p2 ^ ¬p3 ^  ¬p4     ¬p1 ^ ¬p2 ^  ¬p3 ^  ¬p4
+
+Como não podemos ter P1 ^ P2 ou P3 ^ P4, podemos simplificar da seguinte maneira:
+
+p1 ^ ¬p2 ^   p3 ^ ¬p4       ¬p1 ^  p2 ^ ¬p3 ^  p4       
+p1 ^ ¬p2 ^  ¬p3 ^  p4       ¬p1 ^  p2 ^ ¬p3 ^ ¬p4
+p1 ^ ¬p2 ^  ¬p3 ^ ¬p4       ¬p1 ^ ¬p2 ^  p3 ^ ¬p4
+¬p1 ^ p2 ^  p3 ^  ¬p4       ¬p1 ^ ¬p2 ^ ¬p3 ^  p4
+¬p1 ^ ¬p2 ^  ¬p3 ^  ¬p4
+
+Além disso, podemos simplificar da seguinte maneira:
+
+categoria = 'Terror' ^ categoria != 'Romance' => categoria = 'Terror'
+
+anopublicacao > 2021 ^ !anopublicacao < 1999 => anopublicacao > 2021 ^ anopublicacao >= 1999 => anopublicacao > 2021, 
+porque se anopublicacao > 2021, consequentemente anopublicacao >= 1999
+
+livro1. categoria  = 'Terror' ^ anopublicacao > 2021
+livro2. categoria  = 'Terror' ^ anopublicacao < 1999
+livro3. categoria  = 'Terror' ^ anopublicacao <= 2021 ^ anopublicacao >= 1999
+livro4. categoria  = 'Romance' ^ anopublicacao > 2021
+livro5. categoria  = 'Romance' ^ anopublicacao < 1999
+livro6. categoria  = 'Romance' ^ anopublicacao <= 2021 ^ anopublicacao >= 1999
+livro7. categoria != 'Terror' ^ categoria != 'Romance' ^ anopublicacao > 2021
+livro8. categoria != 'Terror' ^ categoria != 'Romance' ^ anopublicacao < 1999
+livro9. categoria != 'Terror' ^ categoria != 'Romance' ^ anopublicacao <= 2021 ^ anopublicacao >= 1999
+
+NOTA_FISCAL -> FHD pois possui chave estrangeira
+
+NOTA_FISCAL "herda" os fragmentos de CLIENTE, pois seus atributos derivados, derivam apenas de CLIENTE
+
+nota1. NOTA_FISCAL ⋉ cliente1
+nota2. NOTA_FISCAL ⋉ cliente2
+             (...)
+nota8. NOTA_FISCAL ⋉ cliente8
+
+ITEM_NF -> FHD pois possui chave estrangeira
+
+Para definir qual "herança" de fragmentos a tabela emprestimo irá "herdar", devemos observar o seguinte:
+1 - Número de vezes que faz junção com uma outra tabela. A "herança" de fragmentos irá "herdar" os fragmentos que possuem maior número de junções com a tabela em questão;
+2 - A "herança" de fragmentos irá "herdar" os fragmentos da tabela que possui maior número de fragmentos.
+
+Nº de junções de ITEM_NF com CLIENTE:  Q1 + Q2 + Q3 = 3
+Nº de junções de ITEM_NF com LIVRO  : 0
+
+ITEM_NF herda "herda" os fragmentos de CLIENTE pois é tabela com que realiza o maior número de junções.
+
+item1. NOTA_FISCAL ⋉ cliente1
+item2. NOTA_FISCAL ⋉ cliente2
+           (...)
+item8. NOTA_FISCAL ⋉ cliente8
