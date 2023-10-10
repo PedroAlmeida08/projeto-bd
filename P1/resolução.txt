@@ -167,3 +167,27 @@ Para valores intervalares, o tipo de índice indicado é o btree.
 
 Q5 =====================================================================================================================================================================================
 
+Pessoas(ID, Nome)
+    PRIMARY KEY(ID)
+
+Saldos(DataSaldo, IDPessoa, Valor)
+    PRIMARY KEY(DataSaldo, IDPessoa)
+    FOREIGN KEY(IDPessoa) REFERENCES Pessoas(ID)
+
+INSERT INTO Pessoas VALUES (1,'Daniel'),(2,'Wagner'),(3,'Marcos'),(4,'Maria')
+INSERT INTO Saldos VALUES ('2012-08-15', 4, 5000)
+
+CREATE INDEX IDX_Pessoa
+    ON Saldos (IDPessoa)
+
+Por default, o PostgreSQL utiliza btree
+
+Uma vez que as tabelas estão criadas, a seguinte consulta foi submetida por você a pedido de seu chefe para retornar o nome e os registros de saldo de um cliente específico:
+
+SELECT P.Nome, S.* 
+  FROM Pessoas As P INNER JOIN Saldos As S ON P.ID = S.IDPessoa 
+ WHERE P.ID = 4
+    
+O índice IDX_Pessoa que foi criado por seu colega de trabalho seria útil para essa consulta? Justifique sua resposta.
+
+Sim, pois o atributo IDPessoa de Saldos é um dos argumentos utilizados na junção. Portanto, utilizar um índice nesse argumento irá otimizar o tempo de retorno da consulta.
