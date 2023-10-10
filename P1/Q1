@@ -106,3 +106,8 @@ item1. NOTA_FISCAL ⋉ cliente1
 item2. NOTA_FISCAL ⋉ cliente2
            (...)
 item8. NOTA_FISCAL ⋉ cliente8
+
+==> Consulta que não se beneficia
+SELECT c.cnome
+  FROM CLIENTE c
+ WHERE c.cnome = 'João'
