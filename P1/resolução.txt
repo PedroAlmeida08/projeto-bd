@@ -158,12 +158,7 @@ Nesse caso, deve-se utilizar o índice de tipo hash pois a consulta deseja retor
 
 Quanto aos aspectos como consumo de espaço em disco e desempenho de operações de INSERT, UPDATE e DELETE, pode-se destacar que:
     - Quanto ao espaço em disco: Os índices que serão criados, se forem criados de forma eficiente, ocuparão menos espaço em disco do que o conjunto inteiro de dados. 
-    - Quanto ao desempenho: 
-        - INSERT: índices podem ajudar a encontrar com mais eficiência o local em que um novo dado deve ser inserido, porém, dependendo da inserção, a reorganização do índice pode ser custosa. 
-        - UPDATE: índices podem ajudar a encontrar com mais eficiência o dado que deve ser atualizado, porém, dependendo da atualização, a reorganização do índice pode ser custosa.
-        - DELETE: índices podem ajudar a encontrar com mais eficiência o dado que deve ser excluído, porém, dependendo da remoção, a reorganização do índice pode ser custosa.
-
-        Ambas as operações podem tanto se beneficiar quanto se prejudicar quando índices são usados, a depender do grau de reorganização que o índice deverá sofrer após a execução do método.
+    - Quanto ao desempenho: Os custo de atualização dos índices quando as operações de INSERT, UPDATE e DELETE sempre será muito maior do que o benefício em utilizar essas estruturas. Por mais que nas operações UPDATE e DELETE seja      mais fácil encontrar as tuplas desejadas, o custo para atualizar o índice ainda assim é muito maior do que o benefício.
 
 Q4 =====================================================================================================================================================================================
 
