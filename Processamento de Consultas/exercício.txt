@@ -1,0 +1,30 @@
+Considere o esquema a seguir:
+
+carro(chassi, placa, marca, modelo, ano)
+PRIMARY_KEY(chassi)
+
+cliente(cpf, nome, tel, uf, endereco)
+PRIMARY_KEY(cpf)
+
+reserva(cpf_cliente, data_reserva, valor)
+PRIMARY_KEY(cpf_cliente, data_reserva)
+FOREIGN KEY(cpf_cliente) REFERENCES cliente(cpf)
+
+carro_reserva(cpf_cliente, data_reserva, chassi)
+PRIMARY_KEY(cpf_cliente, data_reserva, chassi)
+FOREIGN KEY(cpf_cliente, data_reserva) REFERENCES reserva(cpf_cliente, data_reserva)
+FOREIGN KEY(chassi) REFERENCES carro(chassi)
+
+Considere as seguintes consultas e gere a árvore melhorada passo a passo:
+
+a. SELECT nome, chassi, data_reserva
+     FROM cliente c, carro car, reserva r, carro_reserva cr
+    WHERE c.cpf = r.cpf AND r.cpf_cliente = cr.cpf_cliente AND cr.chassi = car.chassi AND uf = "RJ" AND r.data_reserva = cr.data_reserva;
+
+b. SELECT *
+     FROM cliente c, reserva r
+    WHERE c.cpf = r.cpf_cliente AND r.data_reserva < 19/01/1999
+    UNION 
+   SELECT *
+     FROM cliente c, reserva r
+    WHERE c.cpf = r.cpf AND r.data_reserva > 19/01/2023;
