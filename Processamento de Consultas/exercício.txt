@@ -28,3 +28,24 @@ b. SELECT *
    SELECT *
      FROM cliente c, reserva r
     WHERE c.cpf = r.cpf AND r.data_reserva > 19/01/2023;
+
+
+a.
+
+Parse tree
+
+cliente -------
+                \
+                  \
+                  ⨝ ----------  
+                  /             \
+                /                \
+reserva -------                   \
+                                    ⨝ ----- π
+carro_reserva --                  /
+                \                /
+                  \             /
+                  v -----------  
+                  /             
+                /              
+carro ---------
