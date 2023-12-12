@@ -1,3 +1,7 @@
+CREATE SCHEMA trabalho_final;
+
+SET SCHEMA 'trabalho_final';
+
 -- Table: trabalho_finalFinal.animador
 -- DROP TABLE IF EXISTS "trabalho_final".animador;
 CREATE TABLE IF NOT EXISTS "trabalho_final".animador (
@@ -627,3 +631,210 @@ ALTER TABLE IF EXISTS trabalho_final.volume
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
+
+----------------------------  CRIAÇÃO DE ÍNDICES ----------------------------------------------------------------------
+
+/* Match Exato */
+CREATE INDEX idx_genero
+ON genero
+USING hash(nome);
+
+CREATE INDEX idx_pais
+ON pais
+USING hash(nome);
+
+CREATE INDEX idx_categoria
+ON categoria
+USING hash(nome);
+
+/* Intervalo de Valores */
+
+CREATE INDEX idx_avaliacao
+ON editor
+USING btree(avali_desemp);
+
+CREATE INDEX idx_avaliacao
+ON obra_manga
+USING btree(num_leitores);
+
+CREATE INDEX idx_salario_estudio
+ON func_estudio
+USING btree(salario);
+
+CREATE INDEX idx_salario_estudio
+ON func_editora
+USING btree(salario);
+
+
+/* Índices para Chaves Estrangeiras (sempre na tabela que referencia) */
+CREATE INDEX idx_genero_fk
+ON animeGeneroClassifica
+USING hash(genero_fk);
+
+CREATE INDEX idx_anime_fk
+ON animeGeneroClassifica
+USING hash(anime_fk);
+
+CREATE INDEX idx_pais_fk
+ON streamingPaisDisponibilidade
+USING hash(pais_fk);
+
+CREATE INDEX idx_streaming_fk_pais
+ON streamingPaisDisponibilidade
+USING hash(streaming_fk);
+
+CREATE INDEX idx_streaming_fk
+ON animeStreamingLancados
+USING hash(streaming_fk);
+
+CREATE INDEX idx_streaming_anime_fk
+ON animeStreamingLancados
+USING hash(anime_fk);
+
+CREATE INDEX idx_func_editora
+ON mangakaObra_mangaEscreve 
+USING hash(func_editora_fk);
+
+CREATE INDEX idx_obra_manga
+ON mangakaObra_mangaEscreve 
+USING hash(obra_manga);
+
+CREATE INDEX idx_categoria_fk
+ON obra_mangaCategoriaClassifica 
+USING hash(categoria_fk);
+
+CREATE INDEX idx_obra_manga_fk
+ON obra_mangaCategoriaClassifica 
+USING hash(obra_manga_fk);
+
+CREATE INDEX idx_obra_manga_fk_2
+ON editorObra_mangaEdita
+USING hash(obra_manga_fk);
+
+CREATE INDEX idx_func_editora_fk
+ON editorObra_mangaEdita
+USING hash(func_editora_fk);
+
+CREATE INDEX idx_editor_chefe_fk
+ON editor
+USING hash(editor_chefe_fk);
+
+CREATE INDEX idx_func_estudio_fk
+ON animeFunc_estudioEscalam
+USING hash(func_estudio_fk);
+
+CREATE INDEX idx_func_estudio_fk_2
+ON estudioFunc_estudioContratam
+USING hash(func_estudio_fk);
+
+CREATE INDEX idx_anime_fk_2
+ON animeEstudioProduz
+USING hash(anime_fk);
+
+CREATE INDEX idx_estudio_fk
+ON animeEstudioProduz
+USING hash(estudio_fk);
+
+----------------------------  CONSULTAS ----------------------------------------------------------------------
+-- 1
+SELECT DISTINCT trabalho_final.anime.nome
+  FROM trabalho_final.anime, trabalho_final.genero, trabalho_final."animeGeneroClassifica"
+ WHERE (trabalho_final.genero.nome = 'horror'
+    OR trabalho_final.genero.nome = 'ação')
+   AND trabalho_final.genero.id = trabalho_final."animeGeneroClassifica".genero_fk
+   AND trabalho_final.anime.id = trabalho_final."animeGeneroClassifica".anime_fk;
+   
+-- 2
+SELECT DISTINCT trabalho_final.anime.nome
+  FROM trabalho_final.anime, trabalho_final.streaming, trabalho_final.pais,
+	   trabalho_final."streamingPaisDisponibilidade", trabalho_final."animeStreamingLancados"
+ WHERE trabalho_final.pais.nome = 'brasil'
+   AND trabalho_final."streamingPaisDisponibilidade".pais_fk = trabalho_final.pais.nome
+   AND trabalho_final."streamingPaisDisponibilidade".streaming_fk = trabalho_final.streaming.cnpj
+   AND trabalho_final."animeStreamingLancados".streaming_fk = trabalho_final.streaming.cnpj
+   AND trabalho_final."animeStreamingLancados".anime_fk = trabalho_final.anime.id
+   AND trabalho_final.anime.nome LIKE 'a%';
+
+-- 3
+SELECT trabalho_final.func_editora.nome
+  FROM trabalho_final.editor, trabalho_final.func_editora
+ WHERE trabalho_final.editor.func_editora_fk = trabalho_final.func_editora.id
+   AND trabalho_final.editor.avali_desemp <= 7
+   AND trabalho_final.editor.avali_desemp >= 6;
+   
+-- 4
+SELECT DISTINCT trabalho_final.func_editora.nome
+  FROM trabalho_final.obra_manga, trabalho_final."mangakaObra_mangaEscreve", trabalho_final.func_editora
+ WHERE trabalho_final.func_editora.id = trabalho_final."mangakaObra_mangaEscreve".func_editora_fk
+   AND trabalho_final."mangakaObra_mangaEscreve".obra_manga_fk = trabalho_final.obra_manga.id
+   AND trabalho_final.obra_manga.num_leitores > 1000;
+   
+-- 5
+SELECT DISTINCT trabalho_final.func_editora.nome
+  FROM trabalho_final.editor, trabalho_final.categoria, trabalho_final.obra_manga,
+       trabalho_final."obra_mangaCategoriaClassifica" AS C,
+       trabalho_final."editorObra_mangaEdita" AS E,
+       trabalho_final.func_editora
+ WHERE (trabalho_final.categoria.nome = 'acao'
+    OR trabalho_final.categoria.nome = 'drama')
+   AND trabalho_final.categoria.id = C.categoria_fk
+   AND C.obra_manga_fk = trabalho_final.obra_manga.id
+   AND E.obra_manga_fk = trabalho_final.obra_manga.id
+   AND E.func_editora_fk = trabalho_final.editor.func_editora_fk
+   AND trabalho_final.func_editora.id = trabalho_final.editor.editor_chefe_fk
+ORDER BY trabalho_final.func_editora.nome DESC;
+
+-- 6
+(SELECT trabalho_final.func_editora.nome
+   FROM trabalho_final.func_editora
+  WHERE trabalho_final.func_editora.nome LIKE '%porto'
+)
+UNION
+(SELECT trabalho_final.func_estudio.nome
+  FROM trabalho_final.func_estudio
+ WHERE trabalho_final.func_estudio.nome LIKE '%porto'
+);
+
+-- 7
+(SELECT nome
+   FROM trabalho_final.func_estudio,
+        trabalho_final."animeFunc_estudioEscalam" AS E,
+        trabalho_final."estudioFunc_estudioContratam" AS CONTRATA
+  WHERE trabalho_final.func_estudio.salario > 10000
+    AND E.func_estudio = trabalho_final.func_estudio.id
+    AND CONTRATA.func_estudio_fk = trabalho_final.func_estudio.id
+    AND (CAST(CURRENT_DATE AS date) - CAST(CONTRATA.dt_inicio AS date)) between 0 and 30
+)
+UNION
+(SELECT trabalho_final.func_editora.nome
+   FROM trabalho_final.func_editora
+  WHERE trabalho_final.func_editora.salario > 10000
+    AND (CAST(CURRENT_DATE AS date) - CAST(trabalho_final.func_editora.dt_inicio AS date)) between 0 and 30
+);
+
+-- 8
+SELECT trabalho_final.anime.nome
+  FROM trabalho_final.estudio, trabalho_final.anime, trabalho_final."animeEstudioProduz" AS P
+ WHERE trabalho_final.anime.id = P.anime_fk
+   AND P.estudio_fk = trabalho_final.estudio.cnpj
+   AND trabalho_final.estudio.cnpj 
+   IN(SELECT P.estudio_fk
+        FROM(SELECT P.estudio_fk, MAX(quantidade)
+               FROM(SELECT P.estudio_fk, count(P.estudio_fk) AS quantidade
+                      FROM trabalho_final."animeEstudioProduz" AS P
+                    GROUP by P.estudio_fk) AS primeiro
+        ) AS segundo
+   );
+
+-- 9
+SELECT trabalho_final.func_estudio.nome
+  FROM trabalho_final.func_estudio
+INNER JOIN trabalho_final.func_editora 
+        ON trabalho_final.func_estudio.nome = trabalho_final.func_editora.nome
+     WHERE trabalho_final.func_estudio.nome LIKE 'matheus%';
+	 
+-- 10
+SELECT AVG(trabalho_final.obra_manga.num_leitores) AS Media
+  FROM trabalho_final.obra_manga
+GROUP BY trabalho_final.obra_manga.num_cap;
+
