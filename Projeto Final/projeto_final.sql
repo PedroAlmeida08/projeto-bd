@@ -93,7 +93,7 @@ ALTER TABLE
 -- Table: categoria
 -- DROP TABLE IF EXISTS categoria;
 CREATE TABLE IF NOT EXISTS categoria (
-    id integer NOT NULL,
+    id SERIAL,
     nome character varying COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT categoria_pkey PRIMARY KEY (id)
 ) TABLESPACE pg_default;
@@ -731,6 +731,63 @@ USING hash(anime_fk);
 CREATE INDEX idx_estudio_fk
 ON "animeEstudioProduz"
 USING hash(estudio_fk);
+
+----------------------------  TRIGGERS E FUNÇÕES ----------------------------------------------------------------------
+-- Função que cria ou associa categoria a uma Obra_manga
+CREATE OR REPLACE FUNCTION criar_ou_associar_categoria()
+RETURNS TRIGGER AS $$
+BEGIN
+    /* Verifica se existe categoria correspondente na tabela Categoria */
+    IF NOT EXISTS (
+		SELECT 1 
+		  FROM Categoria 
+		  WHERE id = NEW.categoria_fk
+	) THEN
+    /* Cria uma nova entrada em Categoria caso não exista categoria correspondente*/
+    	INSERT INTO Categoria (nome)
+        VALUES (NEW.categoria_fk);
+    END IF;
+    
+	/* Associa categoria_fk a uma categoria existente */
+    UPDATE "obra_mangaCategoriaClassifica"
+       SET categoria_fk = NEW.categoria_fk
+     WHERE obra_manga_fk = NEW.obra_manga_fk;
+	 
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Cria um gatilho que chama uma função que ao classificar uma Obra_manga em uma categoria, verifica se
+-- essa categoria já existe na tabela de categorias, caso exista, associa categoria_fk a ela, caso não,
+-- cria uma nova entrada na tabela Categoria.
+CREATE TRIGGER cria_ou_associa_categoria
+BEFORE INSERT ON "obra_mangaCategoriaClassifica"
+FOR EACH ROW
+EXECUTE FUNCTION criar_ou_associar_categoria();
+
+-- Função que promove funcionário
+CREATE OR REPLACE FUNCTION promover_animador()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.avali_desemp > 9 
+   AND OLD.avali_desemp <= 9 
+  THEN
+       UPDATE Func_estudio
+       SET salario = salario * 1.6, 
+		   tipo = 'animador chefe'
+       WHERE id = NEW.func_estudio_fk;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Cria um gatilho que promove um animador caso sua avaliação de desempenho seja atualizada para um 
+-- valor maior do que 9.
+CREATE TRIGGER promove_animador
+AFTER UPDATE OF avali_desemp ON animador
+FOR EACH ROW
+EXECUTE FUNCTION promover_animador();
 
 ----------------------------  CONSULTAS ----------------------------------------------------------------------
 -- 1
